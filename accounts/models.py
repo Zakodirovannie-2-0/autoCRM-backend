@@ -1,3 +1,6 @@
+from tkinter.constants import CASCADE
+from urllib.response import addbase
+
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 
@@ -36,8 +39,8 @@ class MyUserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     email = models.EmailField(verbose_name="email address", max_length=255, unique=True)
-    first_name = models.CharField(max_length=50, null=True, blank=True)
-    last_name = models.CharField(max_length=50, null=True, blank=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
     is_owner = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -71,5 +74,11 @@ class Customer(models.Model):
     customer_id = models.IntegerField(primary_key=True)
     email = models.EmailField(verbose_name="customer_email", max_length=60, unique=True)
     phone_number = models.CharField(max_length=50, null=True, blank=True)
-    first_name = models.CharField(max_length=50, null=True, blank=True)
-    last_name = models.CharField(max_length=50, null=True, blank=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+
+
+class Employee(models.Model):
+    employee_id = models.IntegerField(primary_key=True)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    role = models.CharField(max_length=50)
