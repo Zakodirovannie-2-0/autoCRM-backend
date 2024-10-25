@@ -71,7 +71,6 @@ class User(AbstractBaseUser):
 
 
 class Customer(models.Model):
-    customer_id = models.IntegerField(primary_key=True)
     email = models.EmailField(verbose_name="customer_email", max_length=60, unique=True)
     phone_number = models.CharField(max_length=50, null=True, blank=True)
     first_name = models.CharField(max_length=50)
@@ -79,6 +78,5 @@ class Customer(models.Model):
 
 
 class Employee(models.Model):
-    employee_id = models.IntegerField(primary_key=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     role = models.CharField(max_length=50)

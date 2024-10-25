@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.models import User
+from accounts.models import *
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -35,3 +35,15 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'password', 'phone_number', 'first_name', 'last_name', 'is_owner', 'date_joined']
         write_only_fields = ('password',)
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ['id', 'email', 'phone_number', 'first_name', 'last_name']
+
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = ['user', 'role']

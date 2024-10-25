@@ -21,15 +21,35 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from accounts.views import *
+from crm.views import *
 
-from accounts.views import UserViewSet
 
-router = routers.DefaultRouter()
-router.register(r'user', UserViewSet, basename='user')
+accounts_router = routers.DefaultRouter()
+accounts_router.register(r'user', UserViewSet, basename='user')
+accounts_router.register(r'customer', CustomerViewSet, basename='customer')
+accounts_router.register(r'employee', EmployeeViewSet, basename='employee')
+
+crm_router = routers.DefaultRouter()
+crm_router.register(r'business', BusinessViewSet, basename='business')
+crm_router.register(r'business_employee', BusinessEmployeeViewSet, basename='business_employee')
+crm_router.register(r'project', ProjectViewSet, basename='project')
+crm_router.register(r'order', OrderViewSet, basename='order')
+crm_router.register(r'task', TaskViewSet, basename='task')
+crm_router.register(r'email-sample', EmailSampleViewSet, basename='email-sample')
+crm_router.register(r'project-email', ProjectEmailViewSet, basename='project-email')
+crm_router.register(r'email-send', EmailSendViewSet, basename='email-send')
+crm_router.register(r'customer-action', CustomerActionViewSet, basename='customer-action')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path(r'api/', include(router.urls)),
+    path(r'accounts/', include(accounts_router.urls)),
+    path(r'crm/', include(crm_router.urls)),
+    path('crm/business/<int:business_pk>/customers/', BusinessCustomersViewSet.as_view({'get': 'list'})),
+    path('crm/business/<int:business_pk>/orders/', OrderListViewSet.as_view({'get': 'list'})),
+    path('crm/business/<int:business_pk>/customer/<int:customer_pk>/orders/', CustomerOrderListViewSet.as_view({'get': 'list'})),
+    path('crm/business/<int:business_pk>/customer/<int:customer_pk>/history/', CustomerHistoryListViewSet.as_view({'get': 'list'})),
     path('api-auth/', include('rest_framework.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
