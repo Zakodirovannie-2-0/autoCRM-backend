@@ -65,3 +65,11 @@ class User(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+
+class Customer(models.Model):
+    customer_id = models.IntegerField(primary_key=True)
+    email = models.EmailField(verbose_name="customer_email", max_length=60, unique=True)
+    phone_number = models.CharField(max_length=50, null=True, blank=True)
+    first_name = models.CharField(max_length=50, null=True, blank=True)
+    last_name = models.CharField(max_length=50, null=True, blank=True)
