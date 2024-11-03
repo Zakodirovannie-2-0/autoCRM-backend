@@ -48,6 +48,7 @@ urlpatterns = [
     path(r'crm/', include(crm_router.urls)),
     path('crm/business/<int:business_pk>/customers/', BusinessCustomersViewSet.as_view({'get': 'list'})),
     path('crm/business/<int:business_pk>/orders/', OrderListViewSet.as_view({'get': 'list'})),
+    path('crm/project/<int:project_pk>/orders/', ProjectOrderListViewSet.as_view({'get': 'list'})),
     path('crm/business/<int:business_pk>/customer/<int:customer_pk>/orders/', CustomerOrderListViewSet.as_view({'get': 'list'})),
     path('crm/business/<int:business_pk>/customer/<int:customer_pk>/history/', CustomerHistoryListViewSet.as_view({'get': 'list'})),
     path('api-auth/', include('rest_framework.urls')),

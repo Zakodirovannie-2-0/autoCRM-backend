@@ -105,6 +105,17 @@ class CustomerOrderListViewSet(viewsets.GenericViewSet):
         return Response(serializer.data)
 
 
+class ProjectOrderListViewSet(viewsets.GenericViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = []
+
+    def list(self, request, project_pk=None):
+        orders = Order.objects.filter(project=project_pk)
+        self.queryset = orders
+        serializer = self.serializer_class(orders, many=True, context={"request": request})
+        return Response(serializer.data)
+
+
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
