@@ -21,14 +21,16 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+
 from accounts.views import *
 from crm.views import *
-
+from django_rest_passwordreset.urls import add_reset_password_urls_to_router
 
 accounts_router = routers.DefaultRouter()
 accounts_router.register(r'user', UserViewSet, basename='user')
 accounts_router.register(r'customer', CustomerViewSet, basename='customer')
 accounts_router.register(r'employee', EmployeeViewSet, basename='employee')
+add_reset_password_urls_to_router(accounts_router, 'api-reset')
 
 crm_router = routers.DefaultRouter()
 crm_router.register(r'business', BusinessViewSet, basename='business')

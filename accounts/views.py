@@ -1,3 +1,4 @@
+from django.contrib.auth.views import PasswordResetView
 from rest_framework import viewsets
 from accounts.models import *
 from accounts.serializers import *
@@ -19,3 +20,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
     permission_classes = []
+
+
+class UserPasswordReset(PasswordResetView):
+    pass
