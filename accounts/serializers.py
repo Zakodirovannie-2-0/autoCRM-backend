@@ -7,10 +7,11 @@ class UserSerializer(serializers.ModelSerializer):
         fields = kwargs.pop('fields', None)
 
         super(UserSerializer, self).__init__(*args, **kwargs)
-
         if fields is not None:
             allowed = set(fields)
+
             existing = set(self.fields.keys())
+
             for field_name in existing - allowed:
                 self.fields.pop(field_name)
 
@@ -34,7 +35,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'password', 'phone_number', 'first_name', 'last_name', 'is_owner', 'date_joined']
-        write_only_fields = ('password',)
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -43,7 +46,3 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = ['id', 'email', 'phone_number', 'first_name', 'last_name']
 
 
-class EmployeeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Employee
-        fields = ['user', 'role']

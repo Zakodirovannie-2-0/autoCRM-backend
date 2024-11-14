@@ -1,9 +1,11 @@
-from django.contrib.admin import action
-from django.template.context_processors import request
-from rest_framework import viewsets, mixins
-from rest_framework.response import Response
+import datetime
 
-from accounts.serializers import CustomerSerializer
+from django.http import HttpResponse, Http404
+from rest_framework import viewsets, mixins, generics, permissions
+from rest_framework.response import Response
+from rest_framework.status import HTTP_401_UNAUTHORIZED
+
+from accounts.serializers import CustomerSerializer, UserSerializer
 from crm.models import *
 from crm.serializers import *
 
@@ -19,15 +21,25 @@ def history_save(data, action, *args):
     action_obj.save()
 
 
+def notification_task(data):
+    task = Task.objects.get(id=data.get('id'))
+    user = Employee.objects.get(user=data.get('employee')).user
+    notification = Notification.objects.create(user=user, task=task, time_add=datetime.datetime.now())
+    time_deadline_notification = task.date_deadline - datetime.timedelta(days=1)
+    notification_deadline = Notification.objects.create(user=user, task=task, time_add=time_deadline_notification)
+    notification.save()
+    notification_deadline.save()
+
+
 class BusinessViewSet(viewsets.ModelViewSet):
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
     permission_classes = []
 
 
-class BusinessEmployeeViewSet(viewsets.ModelViewSet):
-    queryset = BusinessEmployee.objects.all()
-    serializer_class = BusinessEmployeeSerializer
+class EmployeeViewSet(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
     permission_classes = []
 
 
@@ -116,10 +128,45 @@ class ProjectOrderListViewSet(viewsets.GenericViewSet):
         return Response(serializer.data)
 
 
+class ProjectTasksListViewSet(viewsets.GenericViewSet):
+    serializer_class = TaskSerializer
+    permission_classes = []
+
+    def list(self, request, project_pk=None):
+        tasks = Task.objects.filter(project=project_pk)
+        self.queryset = tasks
+        serializer = self.serializer_class(tasks, many=True, context={"request": request})
+        return Response(serializer.data)
+
+
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = []
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        notification_task(serializer.data)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.update(instance, serializer.validated_data)
+        #notification_task(serializer.data)
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        partial = True
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        #notification_task(serializer.data)
+        return Response(serializer.data)
 
 
 class EmailSampleViewSet(viewsets.ModelViewSet):
@@ -157,3 +204,68 @@ class BusinessCustomersViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(customers, many=True, context={"request": request})
         return Response(serializer.data)
 
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = []
+
+    def list(self, request):
+        self.queryset = self.queryset.filter(time_add__lt=datetime.datetime.now()).order_by('-time_add')
+        serializer = self.serializer_class(self.queryset, many=True, context={"request": request})
+        return Response(serializer.data)
+
+
+class UserNotificationView(generics.ListAPIView):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        if request.user is None:
+            return HTTP_401_UNAUTHORIZED
+
+        user_notifications = (self.queryset.filter(user=request.user)
+                              .filter(time_add__lt=datetime.datetime.now())
+                              .order_by('-time_add'))
+
+        serializer = self.serializer_class(user_notifications, many=True, context={"request": request})
+        return Response(serializer.data)
+
+
+class EmployeeProjectViewSet(viewsets.ModelViewSet):
+    queryset = EmployeeProject.objects.all()
+    serializer_class = EmployeeProjectSerializer
+    permission_classes = []
+
+
+class GetBusinessEmployeeViewSet(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+    permission_classes = []
+
+    def list(self, request, business_pk=None):
+        try:
+            employers = Employee.objects.filter(business=business_pk)
+        except Employee.DoesNotExist:
+            raise Http404("Given query not found....")
+
+        serializer = self.serializer_class(employers, many=True, context={"request": request})
+        return Response(serializer.data)
+
+
+class GetProjectUsersViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserInProjectSerializer
+    permission_classes = []
+
+
+    def list(self, request, project_pk=None):
+        try:
+            project_employers = EmployeeProject.objects.filter(project=project_pk)
+        except Project.DoesNotExist:
+            raise Http404("Given query not found....")
+
+        serializer = self.serializer_class(project_employers, many=True, context={ "request": request })
+
+        return Response(serializer.data)

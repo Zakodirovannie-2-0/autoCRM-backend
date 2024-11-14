@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import User, Customer, Employee
+from accounts.models import User, Customer
 
 
 class Business(models.Model):
@@ -7,14 +7,17 @@ class Business(models.Model):
     name = models.CharField(max_length=50)
 
 
-class BusinessEmployee(models.Model):
+class Employee(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
-    employee = models.OneToOneField(Employee, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    role = models.CharField(max_length=50)
 
+    def __str__(self):
+        return f'{self.user}'
 
 class Project(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
-    curator = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    curator = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     schedule = models.CharField(max_length=50, null=True, blank=True)
     description = models.CharField(max_length=500, null=True, blank=True)
@@ -32,6 +35,7 @@ class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     date = models.DateTimeField()
+    date_deadline = models.DateTimeField(null=True)
     description = models.CharField(max_length=500, null=True, blank=True)
     stage = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=50, null=True, blank=True)
@@ -58,3 +62,17 @@ class CustomerAction(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     time = models.DateTimeField(auto_now_add=True)
     action = models.CharField(null=True, blank=True)
+
+
+class Notification(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    time_add = models.DateTimeField()
+    description = models.CharField(null=True, blank=True)
+
+
+class EmployeeProject(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    role = models.CharField(max_length=50)
+

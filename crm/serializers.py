@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from accounts.serializers import UserSerializer
 from crm.models import *
 
 
@@ -6,12 +8,6 @@ class BusinessSerializer(serializers.ModelSerializer):
     class Meta:
         model = Business
         fields = ['id', 'owner', 'name']
-
-
-class BusinessEmployeeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BusinessEmployee
-        fields = ['id', 'business', 'employee']
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -29,7 +25,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['id', 'project', 'employee', 'date', 'description', 'stage', 'status']
+        fields = ['id', 'project', 'employee', 'date', 'date_deadline', 'description', 'stage', 'status']
 
 
 class EmailSampleSerializer(serializers.ModelSerializer):
@@ -54,3 +50,33 @@ class CustomerActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerAction
         fields = ['id', 'customer', 'order', 'time', 'action']
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'task', 'user', 'time_add', 'description']
+
+
+class EmployeeProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployeeProject
+        fields = ['employee', 'project', 'role']
+
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = ['user', 'business', 'role']
+
+
+class UserInProjectSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = EmployeeProject
+        fields = ['employee', 'user', 'role']
+
+    def get_user(self, obj):
+        user_serializer = UserSerializer(obj.employee.user)
+        return user_serializer.data

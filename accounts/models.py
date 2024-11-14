@@ -1,5 +1,3 @@
-from tkinter.constants import CASCADE
-from urllib.response import addbase
 
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
@@ -75,8 +73,3 @@ class Customer(models.Model):
     phone_number = models.CharField(max_length=50, null=True, blank=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-
-
-class Employee(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    role = models.CharField(max_length=50)
