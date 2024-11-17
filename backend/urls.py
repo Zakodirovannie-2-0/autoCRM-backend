@@ -32,31 +32,25 @@ accounts_router.register(r'customer', CustomerViewSet, basename='customer')
 
 
 crm_router = routers.DefaultRouter()
-crm_router.register(r'business', BusinessViewSet, basename='business')
 crm_router.register(r'employee', EmployeeViewSet, basename='employee')
-crm_router.register(r'project', ProjectViewSet, basename='project')
 crm_router.register(r'order', OrderViewSet, basename='order')
 crm_router.register(r'task', TaskViewSet, basename='task')
 crm_router.register(r'email-sample', EmailSampleViewSet, basename='email-sample')
-crm_router.register(r'project-email', ProjectEmailViewSet, basename='project-email')
 crm_router.register(r'email-send', EmailSendViewSet, basename='email-send')
 crm_router.register(r'customer-action', CustomerActionViewSet, basename='customer-action')
 crm_router.register(r'notification', NotificationViewSet, basename='notification')
-crm_router.register(r'employee-project', EmployeeProjectViewSet, basename='employee_project')
-
+crm_router.register(r'service', ServiceViewSet, basename='service')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'accounts/', include(accounts_router.urls)),
     path(r'crm/', include(crm_router.urls)),
-    path('crm/business/<int:business_pk>/customers/', BusinessCustomersViewSet.as_view({'get': 'list'})),
-    path('crm/business/<int:business_pk>/orders/', OrderListViewSet.as_view({'get': 'list'})),
-    path('crm/business/<int:business_pk>/employers', GetBusinessEmployeeViewSet.as_view({'get': 'list'})),
-    path('crm/project/<int:project_pk>/orders/', ProjectOrderListViewSet.as_view({'get': 'list'})),
-    path('crm/project/<int:project_pk>/employers/', GetProjectUsersViewSet.as_view({'get': 'list'})),
-    path('crm/project/<int:project_pk>/tasks/', ProjectTasksListViewSet.as_view({'get': 'list'})),
-    path('crm/business/<int:business_pk>/customer/<int:customer_pk>/orders/', CustomerOrderListViewSet.as_view({'get': 'list'})),
-    path('crm/business/<int:business_pk>/customer/<int:customer_pk>/history/', CustomerHistoryListViewSet.as_view({'get': 'list'})),
+    path('crm/customers/', CustomersViewSet.as_view({'get': 'list'})),
+    path('crm/employers/', GetEmployeeViewSet.as_view({'get': 'list'})),
+    path('crm/orders/', OrderListViewSet.as_view({'get': 'list'})),
+    path('crm/tasks/', TasksListViewSet.as_view({'get': 'list'})),
+    path('crm/customer/<int:customer_pk>/orders/', CustomerOrderListViewSet.as_view({'get': 'list'})),
+    path('crm/customer/<int:customer_pk>/history/', CustomerHistoryListViewSet.as_view({'get': 'list'})),
     path('api-auth/', include('rest_framework.urls')),
     path('accounts/me/', GetUserInfoView.as_view()),
     path('accounts/my-notifications/', UserNotificationView.as_view()),

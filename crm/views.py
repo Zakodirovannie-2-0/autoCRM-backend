@@ -31,21 +31,9 @@ def notification_task(data):
     notification_deadline.save()
 
 
-class BusinessViewSet(viewsets.ModelViewSet):
-    queryset = Business.objects.all()
-    serializer_class = BusinessSerializer
-    permission_classes = []
-
-
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
-    permission_classes = []
-
-
-class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
     permission_classes = []
 
 
@@ -83,9 +71,8 @@ class OrderListViewSet(viewsets.GenericViewSet):
     serializer_class = OrderSerializer
     permission_classes = []
 
-    def list(self, request, business_pk=None):
-        business_projects = Project.objects.filter(business=business_pk).values_list('id', flat=True)
-        customers_orders = Order.objects.filter(project__in=business_projects)
+    def list(self, request):
+        customers_orders = Order.objects.all()
         self.queryset = customers_orders
         serializer = self.serializer_class(customers_orders, many=True, context={"request": request})
         return Response(serializer.data)
@@ -95,9 +82,8 @@ class CustomerHistoryListViewSet(viewsets.GenericViewSet):
     serializer_class = CustomerActionSerializer
     permission_classes = []
 
-    def list(self, request, business_pk=None, customer_pk=None):
-        business_projects = Project.objects.filter(business=business_pk).values_list('id', flat=True)
-        customers_orders = Order.objects.filter(project__in=business_projects).values_list('id', flat=True)
+    def list(self, request, customer_pk=None):
+        customers_orders = Order.objects.all().alues_list('id', flat=True)
 
         actions = CustomerAction.objects.filter(customer=customer_pk).filter(order__in=customers_orders)
         self.queryset = actions
@@ -109,31 +95,19 @@ class CustomerOrderListViewSet(viewsets.GenericViewSet):
     serializer_class = OrderSerializer
     permission_classes = []
 
-    def list(self, request, business_pk=None, customer_pk=None):
-        business_projects = Project.objects.filter(business=business_pk).values_list('id', flat=True)
-        customers_orders = Order.objects.filter(customer=customer_pk).filter(project__in=business_projects)
+    def list(self, request, customer_pk=None):
+        customers_orders = Order.objects.filter(customer=customer_pk)
         self.queryset = customers_orders
         serializer = self.serializer_class(customers_orders, many=True, context={"request": request})
         return Response(serializer.data)
 
 
-class ProjectOrderListViewSet(viewsets.GenericViewSet):
-    serializer_class = OrderSerializer
-    permission_classes = []
-
-    def list(self, request, project_pk=None):
-        orders = Order.objects.filter(project=project_pk)
-        self.queryset = orders
-        serializer = self.serializer_class(orders, many=True, context={"request": request})
-        return Response(serializer.data)
-
-
-class ProjectTasksListViewSet(viewsets.GenericViewSet):
+class TasksListViewSet(viewsets.GenericViewSet):
     serializer_class = TaskSerializer
     permission_classes = []
 
-    def list(self, request, project_pk=None):
-        tasks = Task.objects.filter(project=project_pk)
+    def list(self, request):
+        tasks = Task.objects.all()
         self.queryset = tasks
         serializer = self.serializer_class(tasks, many=True, context={"request": request})
         return Response(serializer.data)
@@ -175,12 +149,6 @@ class EmailSampleViewSet(viewsets.ModelViewSet):
     permission_classes = []
 
 
-class ProjectEmailViewSet(viewsets.ModelViewSet):
-    queryset = ProjectEmail.objects.all()
-    serializer_class = ProjectEmailSerializer
-    permission_classes = []
-
-
 class EmailSendViewSet(viewsets.ModelViewSet):
     queryset = EmailSend.objects.all()
     serializer_class = EmailSendSerializer
@@ -193,15 +161,13 @@ class CustomerActionViewSet(viewsets.ModelViewSet):
     permission_classes = []
 
 
-class BusinessCustomersViewSet(viewsets.ViewSet):
+class CustomersViewSet(viewsets.ViewSet):
     serializer_class = CustomerSerializer
+    queryset = Customer.objects.all()
     permission_classes = []
 
-    def list(self, request, business_pk=None):
-        business_projects = Business.objects.filter(id=business_pk).values_list('id', flat=True)
-        customers_orders = Order.objects.filter(project__in=business_projects).values_list('id', flat=True)
-        customers = Customer.objects.filter(id__in=customers_orders)
-        serializer = self.serializer_class(customers, many=True, context={"request": request})
+    def list(self, request):
+        serializer = self.serializer_class(self.queryset, many=True, context={"request": request})
         return Response(serializer.data)
 
 
@@ -233,39 +199,17 @@ class UserNotificationView(generics.ListAPIView):
         return Response(serializer.data)
 
 
-class EmployeeProjectViewSet(viewsets.ModelViewSet):
-    queryset = EmployeeProject.objects.all()
-    serializer_class = EmployeeProjectSerializer
-    permission_classes = []
-
-
-class GetBusinessEmployeeViewSet(viewsets.ModelViewSet):
+class GetEmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
     permission_classes = []
 
-    def list(self, request, business_pk=None):
-        try:
-            employers = Employee.objects.filter(business=business_pk)
-        except Employee.DoesNotExist:
-            raise Http404("Given query not found....")
-
-        serializer = self.serializer_class(employers, many=True, context={"request": request})
+    def list(self, request):
+        serializer = self.serializer_class(self.queryset, many=True, context={"request": request})
         return Response(serializer.data)
 
 
-class GetProjectUsersViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserInProjectSerializer
+class ServiceViewSet(viewsets.ModelViewSet):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
     permission_classes = []
-
-
-    def list(self, request, project_pk=None):
-        try:
-            project_employers = EmployeeProject.objects.filter(project=project_pk)
-        except Project.DoesNotExist:
-            raise Http404("Given query not found....")
-
-        serializer = self.serializer_class(project_employers, many=True, context={ "request": request })
-
-        return Response(serializer.data)

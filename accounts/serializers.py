@@ -34,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'password', 'phone_number', 'first_name', 'last_name', 'is_owner', 'date_joined']
+        fields = ['id', 'email', 'password', 'phone_number', 'first_name', 'last_name', 'role', 'date_joined']
         extra_kwargs = {
             'password': {'write_only': True},
         }
@@ -43,6 +43,6 @@ class UserSerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ['id', 'email', 'phone_number', 'first_name', 'last_name']
+        fields = ['id', 'email', 'phone_number', 'first_name', 'last_name', 'date_joined']
 
 
