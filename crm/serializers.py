@@ -1,13 +1,18 @@
 from rest_framework import serializers
 
-from accounts.serializers import UserSerializer
+from accounts.serializers import UserSerializer, CustomerSerializer
 from crm.models import *
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    service_price = serializers.SerializerMethodField()
+
     class Meta:
         model = Order
-        fields = ['id', 'customer', 'date', 'stage', 'price_sum']
+        fields = ['id', 'service', 'customer', 'date', 'stage', 'price_sum', 'service_price']
+
+    def get_service_price(self, obj):
+        return obj.service.price
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -49,4 +54,35 @@ class EmployeeSerializer(serializers.ModelSerializer):
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
-        fields = ['id', 'name', 'description']
+        fields = ['id', 'name', 'description', 'price']
+
+
+class WidgetSerializer(serializers.Serializer):
+    service_id = serializers.IntegerField()
+    email = serializers.EmailField(max_length=100)
+    date = serializers.DateTimeField()
+
+
+class ServiceOrderSerializer(serializers.ModelSerializer):
+    customer_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = ['id', 'customer', 'date', 'stage', 'price_sum']
+
+    def get_customer_name(self, obj):
+        return obj.name
+
+
+class OrderListSerializer(serializers.ModelSerializer):
+    service_price = serializers.SerializerMethodField()
+    customer = CustomerSerializer()
+    service = ServiceSerializer()
+
+    class Meta:
+        model = Order
+        fields = ['id', 'service', 'customer', 'date', 'stage', 'price_sum', 'service_price']
+
+    def get_service_price(self, obj):
+        return obj.service.price
+

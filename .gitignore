@@ -2,3 +2,5 @@
 accounts/migrations
 crm/migrations
 /.env
+static
+staticfiles_build

@@ -2,6 +2,7 @@ import datetime
 
 from django.http import HttpResponse, Http404
 from rest_framework import viewsets, mixins, generics, permissions
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
 
@@ -68,7 +69,7 @@ class OrderViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.
 
 
 class OrderListViewSet(viewsets.GenericViewSet):
-    serializer_class = OrderSerializer
+    serializer_class = OrderListSerializer
     permission_classes = []
 
     def list(self, request):
@@ -213,3 +214,36 @@ class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     permission_classes = []
+
+
+class WidgetViewSet(viewsets.ViewSet):
+    serializer_class = WidgetSerializer
+    permission_classes = []
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        service = get_object_or_404(Service.objects.all(), id=serializer.data.get('service_id'))
+        try:
+            customer = Customer.objects.get(email=serializer.data.get('email'))
+        except Customer.DoesNotExist:
+            customer = Customer(email=serializer.data.get('email'))
+            customer.save()
+
+        order = Order(service=service, customer=customer, date=serializer.data.get('date'), stage='start')
+        order.save()
+
+        return Response(OrderSerializer(order).data)
+
+
+
+class ServiceOrdersListViewSet(viewsets.ViewSet):
+    serializer_class = OrderSerializer
+    queryset = Order.objects.all()
+    permission_classes = []
+
+    def list(self, request):
+
+        serializer = self.serializer_class(self.queryset, many=True, context={"request": request})
+        return Response(serializer.data)

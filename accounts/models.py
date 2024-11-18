@@ -40,6 +40,7 @@ class User(AbstractBaseUser):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
+    avatar = models.ImageField(upload_to='images/avatars/', null=True, blank=True)
     role = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)

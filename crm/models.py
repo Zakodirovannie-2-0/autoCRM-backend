@@ -13,13 +13,14 @@ class Employee(models.Model):
 class Service(models.Model):
     name = models.CharField(max_length=50, null=True, blank=True)
     description = models.CharField(max_length=50, null=True, blank=True)
+    price = models.IntegerField(default=0)
 
 
 class Order(models.Model):
-    project = models.ForeignKey(Service, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
-    stage = models.CharField(max_length=50, null=True, blank=True)
+    date = models.DateTimeField()
+    stage = models.CharField(max_length=50, default='start')
     price_sum = models.IntegerField(default=0)
 
 
