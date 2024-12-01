@@ -86,3 +86,7 @@ class OrderListSerializer(serializers.ModelSerializer):
     def get_service_price(self, obj):
         return obj.service.price
 
+
+class EmailSampleSendSerializer(serializers.Serializer):
+    email_list = serializers.ListField(child=serializers.EmailField())
+    text = serializers.CharField()

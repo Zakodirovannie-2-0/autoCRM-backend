@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
 
 from accounts.serializers import CustomerSerializer, UserSerializer
+from backend.email_sample_send import emails_send
 from crm.models import *
 from crm.serializers import *
 
@@ -247,3 +248,33 @@ class ServiceOrdersListViewSet(viewsets.ViewSet):
 
         serializer = self.serializer_class(self.queryset, many=True, context={"request": request})
         return Response(serializer.data)
+
+
+class OrderStatusListViewSet(viewsets.ViewSet):
+    permission_classes = []
+
+    def list(self, request):
+        customers_orders = Order.objects.all()
+        self.queryset = customers_orders
+
+        count = len(customers_orders)
+        income = sum(map(lambda x: x.price_sum, customers_orders))
+        data = {
+            "count" : count,
+            "income": income
+        }
+
+        return Response(data)
+
+
+class EmailSampleSendViewSet(viewsets.ViewSet):
+    serializer_class = EmailSampleSendSerializer
+    permission_classes = []
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        emails_send(serializer.data.get("email_list"), serializer.data.get("text"))
+
+        return Response(request.data)
