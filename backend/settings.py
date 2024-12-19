@@ -222,8 +222,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
-ALLOWED_HOSTS = ["*"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://85.192.29.94:3000", "http://*"]
+ALLOWED_HOSTS = ["*", "http://localhost:3000", "http://85.192.29.94:3000", "85.192.29.94"]
 AUTH_USER_MODEL = 'accounts.User'
 DJANGO_REST_LOOKUP_FIELD = 'email'
 
